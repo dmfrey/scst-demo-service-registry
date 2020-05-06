@@ -1,0 +1,126 @@
+
+logging.level:
+  org.apache.kafka: INFO
+  org.springframework.cloud.stream: DEBUG
+  org.springframework.retry: DEBUG
+  org.springframework.web: DEBUG
+  io.pivotal.dfrey.scst: DEBUG
+
+spring:
+
+  schema:
+    avro:
+      schema-locations:
+        - classpath:avro/NameUpdated.avsc
+        - classpath:avro/NodeAssigned.avsc
+        - classpath:avro/WorkorderCompleted.avsc
+        - classpath:avro/WorkorderOpened.avsc
+        - classpath:avro/WorkorderStarted.avsc
+        - classpath:avro/WorkorderStopped.avsc
+
+  cloud:
+
+    stream:
+
+      function:
+        definition: workorderEventPublisher;processGenericRecords # processNameUpdated;processNodeAssigned;processWorkorderDomainEvent;workorderEventPublisher;processGenericRecords #;processWorkorder
+
+      bindings:
+
+#        processNameUpdated-in-0:
+#          destination: process.workorder-events.name-updated
+
+#        processNameUpdated-out-0:
+#          destination: transformed.workorder-events
+
+#        processNodeAssigned-in-0:
+#          destination: process.workorder-events.node-assigned
+
+#        processNodeAssigned-out-0:
+#          destination: transformed.workorder-events
+
+#        processWorkorderDomainEvent-in-0:
+#          destination: transformed.workorder-events
+#          use-native-decoding: true
+
+#        processWorkorder-in-0:
+#          destination: transformed.workorder-events
+#          use-native-decoding: true
+
+        workorderEventPublisher-out-0:
+          destination: process.workorder-events.specific-record
+          producer:
+            useNativeEncoding: true
+
+        processGenericRecords-in-0:
+          destination: process.workorder-events.specific-record
+          group: test
+          consumer:
+            useNativeDecoding: true
+
+      schema-registry-client:
+        endpoint: http://localhost:8081
+
+#      schema:
+#        avro:
+#          schema-locations:
+#            - classpath:avro/NameUpdated.avsc
+#            - classpath:avro/NodeAssigned.avsc
+#            - classpath:avro/WorkorderCompleted.avsc
+#            - classpath:avro/WorkorderOpened.avsc
+#            - classpath:avro/WorkorderStarted.avsc
+#            - classpath:avro/WorkorderStopped.avsc
+
+      kafka:
+
+        binder:
+          brokers: ["localhost:9092"]
+
+        streams:
+
+          binder:
+            configuration:
+              commit.interval.ms: 1000
+              schema.registry.url: http://localhost:8081
+              autoAddPartitions: true
+              minPartitionCount: 4
+              configuration.application.server: localhost:${server.port}
+              spring:
+                json:
+                  trusted.packages: io.pivotal.dfrey.scst.workorders.domain.events
+            state-store-retry:
+              max-attempts: 5
+              backoff-period: 1000
+            transaction:
+              transaction-id-prefix: tx-
+
+          bindings:
+#            processNameUpdated-in-0:
+#              consumer:
+#                application-id: scst.process.name-updated
+#                keySerde: org.apache.kafka.common.serialization.Serdes$UUIDSerde
+#                valueSerde: io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde
+#            processNodeAssigned-in-0:
+#              consumer:
+#                application-id: scst.process.node-assigned
+#                keySerde: org.apache.kafka.common.serialization.Serdes$UUIDSerde
+#                valueSerde: io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde
+#            processWorkorderDomainEvent-in-0:
+#              consumer:
+#                keySerde: org.apache.kafka.common.serialization.Serdes$UUIDSerde
+#                valueSerde: org.springframework.kafka.support.serializer.JsonSerde
+
+            processGenericRecords-in-0:
+              consumer:
+#                application-id: scst.process.generic-record
+                configuration:
+                  value.deserializer: io.confluent.kafka.streams.serdes.avro.SpecificAvroSerializer
+                  schema.registry.url: http://localhost:8081
+
+            workorderEventPublisher-out-0:
+              producer:
+                configuration:
+                  value.serializer: io.confluent.kafka.streams.serdes.avro.SpecificAvroSerializer
+                  schema.registry.url: http://localhost:8081
+
+management.endpoints.jmx.exposure.exclude: '*'

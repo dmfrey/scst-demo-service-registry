@@ -1,0 +1,13 @@
+{
+    "name": "NameUpdated",
+    "namespace": "events.workorders",
+    "type": "record",
+    "fields": [
+        {"name": "eventType", "type": "string", "default": "NameUpdated"},
+        {"name": "workorderId", "type": "string", "logicalType": "uuid"},
+        {"name": "title", "type": "string"},
+        {"name": "user", "type": "string"},
+        {"name": "node", "type": "string"},
+        {"name": "occurredOn", "type": "long", "logicalType": "timestamp-millis"}
+    ]
+}

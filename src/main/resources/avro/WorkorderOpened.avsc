@@ -1,0 +1,12 @@
+{
+    "name": "WorkorderOpened",
+    "namespace": "events.workorders",
+    "type": "record",
+    "fields": [
+        {"name": "eventType", "type": "string", "default": "WorkorderOpened"},
+        {"name": "workorderId", "type": "string", "logicalType": "uuid"},
+        {"name": "user", "type": "string"},
+        {"name": "node", "type": "string"},
+        {"name": "occurredOn", "type": "long", "logicalType": "timestamp-millis"}
+    ]
+}

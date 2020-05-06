@@ -1,0 +1,14 @@
+{
+    "name": "NodeAssigned",
+    "namespace": "events.workorders",
+    "type": "record",
+    "fields": [
+        {"name": "eventType", "type": "string", "default": "NodeAssigned"},
+        {"name": "workorderId", "type": "string", "logicalType": "uuid"},
+        {"name": "currentNode", "type": "string"},
+        {"name": "targetNode", "type": "string"},
+        {"name": "user", "type": "string"},
+        {"name": "node", "type": "string"},
+        {"name": "occurredOn", "type": "long", "logicalType": "timestamp-millis"}
+    ]
+}
